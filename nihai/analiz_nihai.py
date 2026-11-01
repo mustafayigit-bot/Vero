@@ -140,7 +140,7 @@ ax.errorbar(md, 1, xerr=[[md-ci90[0]], [ci90[1]-md]], fmt='o', color='k', capsiz
 ax.text(md, 0.72, f'Fark = {md:.3f} mm\n%90 GA: {ci90[0]:.3f} ile {ci90[1]:.3f}', ha='center', fontsize=8.5)
 ax.axvline(0, color='grey', lw=.6, ls=':'); ax.set_xlim(-0.33, 0.33); ax.set_ylim(0.4, 1.55); ax.set_yticks([])
 ax.spines['left'].set_visible(False); ax.set_xlabel('Primescan − Füzyon ortalama farkı (mm)')
-ax.set_title('Eşdeğerlik testi (TOST): %90 GA tüm eşdeğerlik sınırlarının içinde'); save(f, 's10_tost.png')
+ax.set_title('Eşdeğerlik testi (TOST): farkın %90 GA’sı ve eşdeğerlik sınırları'); save(f, 's10_tost.png')
 
 # ---------- güç ----------
 tp = TTestPower(); ns = np.arange(4, 31)
@@ -180,6 +180,28 @@ for M, c in [(0.10, '#2E8B57'), (0.05, '#9BC79F')]: axs[1].plot(ns, tost_c[M], c
 axs[1].axhline(.8, color='grey', ls=':', lw=1); axs[1].axvline(15, color='k', lw=.8); axs[1].legend(frameon=False, fontsize=8, title='Eşdeğerlik sınırı', title_fontsize=8)
 axs[1].set_xlabel('Katılımcı sayısı (n)'); axs[1].set_ylim(0, 1.05); axs[1].set_title('b) Eşdeğerlik testi (TOST)\nPrimescan – Füzyon', fontsize=9.5)
 f.tight_layout(); save(f, 's12_guc_posthoc.png')
+
+# Şekil 13: eşdeğerlik sınırının çalışmanın kendi verisi ve gücüne göre belirlenmesi
+Ms = np.round(np.arange(0.02, 0.1501, 0.005), 3)
+pow_M = [tost_power(M, n, 30000) for M in Ms]
+se_d = sd/np.sqrt(n)
+p_M = [max(stats.t.sf((md+M)/se_d, n-1), stats.t.cdf((md-M)/se_d, n-1)) for M in Ms]
+min_M = max(abs(ci90[0]), abs(ci90[1]))
+M80 = float(np.interp(0.80, pow_M, Ms))
+pw10 = R['guc']['tost15']['0.1']
+f, axs = plt.subplots(1, 2, figsize=(6.8, 3.1))
+axs[0].plot(Ms, pow_M, color='#2E8B57', lw=2); axs[0].axhline(.8, color='grey', ls=':', lw=1)
+axs[0].axvline(M80, color='grey', ls='--', lw=.8); axs[0].text(M80+.003, .35, f'%80 güç:\n±{M80:.3f} mm', fontsize=8)
+axs[0].axvline(0.10, color='#C0632B', lw=1.2); axs[0].text(0.103, .55, f'Seçilen sınır\n±0.10 mm\ngüç = %{100*pw10:.1f}', fontsize=8, color='#C0632B')
+axs[0].set_xlabel('Eşdeğerlik sınırı ±Δ (mm)'); axs[0].set_ylabel('İstatistiksel güç (n = 15)'); axs[0].set_ylim(0, 1.03)
+axs[0].set_title('a) n = 15 ile eşdeğerlik testinin gücü', fontsize=9.5)
+axs[1].plot(Ms, p_M, color='#5B4C9A', lw=2); axs[1].axhline(.05, color='grey', ls=':', lw=1); axs[1].text(0.128, .055, 'p = 0.05', fontsize=8)
+axs[1].axvline(min_M, color='grey', ls='--', lw=.8); axs[1].text(min_M+.003, .12, f'En küçük\neşdeğerlik sınırı:\n±{min_M:.3f} mm', fontsize=8)
+axs[1].axvline(0.10, color='#C0632B', lw=1.2)
+axs[1].set_xlabel('Eşdeğerlik sınırı ±Δ (mm)'); axs[1].set_ylabel('TOST p değeri'); axs[1].set_ylim(0, 0.25)
+axs[1].set_title('b) Eşdeğerlik sınırına göre TOST p değeri', fontsize=9.5)
+f.tight_layout(); save(f, 's13_esdegerlik_siniri.png')
+R['esd'] = dict(min_M=min_M, M80=M80)
 
 R['ham'] = [[ids[i]] + [float(v) for v in X[i]] + [int(x) for x in rk[i]] for i in range(n)]
 json.dump(R, open(os.path.join(out, 'sonuclar.json'), 'w'), ensure_ascii=False, indent=1, default=float)

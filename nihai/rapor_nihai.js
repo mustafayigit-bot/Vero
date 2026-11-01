@@ -17,6 +17,7 @@ const f2 = (x) => Number(x).toFixed(2);
 const f3 = (x) => Number(x).toFixed(3);
 const pf = (p) => (p < 0.001 ? '< 0.001' : '= ' + Number(p).toFixed(3));
 const pct = (x) => '%' + (100 * x).toFixed(1);
+const E = R.esd;
 const D = R.desc, FR = R.friedman, IK = R.ikili, U = R.uyum, G = R.guc;
 
 // ---------- yardımcılar ----------
@@ -110,7 +111,7 @@ C.push(
   keyBox('Ana bulgular', [
     `Üç yöntemin doğruluğu arasında anlamlı fark vardır: **Friedman χ²(2) = ${f2(FR.chi2)}; p < 0.001; Kendall’s W = ${f3(FR.W)} (büyük etki).**`,
     `**KIBT** modelleri en yüksek sapmayı göstermiştir (${f3(K.ort)} ± ${f3(K.ss)} mm). KIBT; hem Primescan’den (${f3(KP.ort)} mm) hem Füzyon modelden (${f3(KF.ort)} mm) daha fazla sapmaktadır (her ikisi p < 0.001). 15 katılımcının **tamamında** KIBT en kötü sonucu vermiştir.`,
-    `**Primescan** (${f3(PS.ort)} ± ${f3(PS.ss)} mm) ve **Füzyon model** (${f3(FU.ort)} ± ${f3(FU.ss)} mm) arasında fark yoktur (fark ${f3(PF.ort)} mm; p = ${f3(PF.p_bonf)}). İki yöntem ±0.10 mm sınırında **istatistiksel olarak eşdeğerdir** (TOST p < 0.001).`,
+    `**Primescan** (${f3(PS.ort)} ± ${f3(PS.ss)} mm) ve **Füzyon model** (${f3(FU.ort)} ± ${f3(FU.ss)} mm) arasında fark yoktur (fark ${f3(PF.ort)} mm; p = ${f3(PF.p_bonf)}). İki yöntem, çalışmanın kendi güç analizine göre belirlenen ±0.10 mm sınırında **istatistiksel olarak eşdeğerdir** (TOST p < 0.001); veriler ±${f3(E.min_M)} mm’ye kadar daha dar sınırlarda da eşdeğerliği desteklemektedir.`,
     `Füzyon işlemi, ağız içi taramanın doğruluğunu korurken KIBT’nin tek başına sağladığı doğruluğu yaklaşık **5 kat** iyileştirmiştir.`,
     `**n = 15 yeterlidir:** tasarıma uygun a priori hesaplama 15 katılımcı vermektedir; gözlenen verilerde genel karşılaştırmanın gücü **≥ %99**, eşdeğerlik testinin gücü **${pct(G.tost15['0.1'])}**’dir.`,
   ]),
@@ -124,7 +125,7 @@ C.push(
     ['Dağılımı incelemek', 'Shapiro–Wilk testi, Q–Q grafikleri', 'n < 50 için en güçlü normallik testidir.'],
     ['Üç yöntemi birlikte karşılaştırmak', 'Friedman testi; etki büyüklüğü Kendall’s W', 'Aynı katılımcıda üç bağımlı ölçüm vardır ve bir değişken normal dağılmamaktadır.'],
     ['Hangi yöntemlerin farklı olduğunu bulmak', 'Wilcoxon işaretli sıralar testi + Bonferroni düzeltmesi; etki büyüklüğü r = Z/√n', 'Üç ikili karşılaştırmada I. tip hata kontrol altına alınmıştır.'],
-    ['Primescan ve Füzyon’un benzerliğini göstermek', 'Eşdeğerlik testi (TOST, ±0.10 mm); Bland–Altman analizi; ICC(A,1)', '“Fark bulunamadı” sonucu benzerliği kanıtlamaz; eşdeğerlik ayrıca test edilmelidir.'],
+    ['Primescan ve Füzyon’un benzerliğini göstermek', 'Eşdeğerlik testi (TOST, ±0.10 mm); Bland–Altman analizi; ICC(A,1)', '“Fark bulunamadı” sonucu benzerliği kanıtlamaz. Eşdeğerlik sınırı, çalışmanın kendi güç analizine göre belirlenmiştir (Bölüm 6.1).'],
     ['Örneklem yeterliliğini doğrulamak', 'A priori güç (G*Power, eşleştirilmiş test); post-hoc güç (merkezi olmayan χ² ve simülasyon)', 'Tasarıma uygun hesaplama ve gözlenen verilerle doğrulama birlikte yapılmıştır.'],
   ], [24, 38, 38], { left: true }),
   NOTE('SS: standart sapma; GA: güven aralığı; ÇAA: çeyrekler arası aralık; TOST: iki tek yönlü test; ICC(A,1): iki yönlü rastgele etkiler modeli, mutlak uyum, tek ölçüm sınıf içi korelasyon katsayısı. Analizler Python 3 (SciPy, statsmodels, pingouin) ile yapılmış olup SPSS 25 ile birebir yeniden üretilebilir.'),
@@ -174,6 +175,14 @@ C.push(
   // 6
   H1('6. Primescan ve Füzyon Model Arasındaki Uyum ve Eşdeğerlik'),
   P('Çalışmanın klinik açıdan en önemli sorusu, füzyon işleminin ağız içi taramanın doğruluğunu koruyup korumadığıdır. Bir testte “fark bulunamaması” iki yöntemin aynı olduğunu kanıtlamaz. Bu nedenle benzerlik üç tamamlayıcı yöntemle değerlendirilmiştir.'),
+  H2('6.1. Eşdeğerlik sınırının belirlenmesi'),
+  P(`Eşdeğerlik testi (TOST), iki yöntem arasındaki ortalama farkın önceden belirlenen bir sınırın (±Δ) içinde kaldığını göstermeyi amaçlar. Bu çalışmada eşdeğerlik sınırı, harici bir klinik eşik yerine **çalışmanın kendi verisi ve örneklem büyüklüğü esas alınarak** belirlenmiştir. Bu amaçla, n = 15 katılımcı ve gözlenen fark değişkenliği (farkların SS’si = ${f3(U.ss)} mm) ile eşdeğerlik testinin farklı sınırlardaki gücü Monte Carlo simülasyonu ile hesaplanmıştır (Şekil 8a).`),
+  BL(`n = 15 ile eşdeğerlik testi **±${f3(E.M80)} mm** ve daha geniş sınırlarda en az %80 güce ulaşmaktadır.`),
+  BL(`**±0.10 mm** sınırında güç **${pct(G.tost15['0.1'])}**’dir. Yüksek güç sağladığı ve yuvarlak, kolay yorumlanabilir bir değer olduğu için ±0.10 mm (100 µm) eşdeğerlik sınırı olarak seçilmiştir.`),
+  BL(`Gözlenen verilerle eşdeğerliğin gösterilebildiği **en küçük sınır ±${f3(E.min_M)} mm**’dir (Şekil 8b). Yani iki yöntem arasındaki ortalama fark, %90 güvenle 43 µm’yi aşmamaktadır.`),
+  ...figure('s13_esdegerlik_siniri.png', 6.2, '(a) n = 15 ile eşdeğerlik testinin farklı sınırlardaki gücü. (b) Eşdeğerlik sınırına göre TOST p değeri. Turuncu çizgi seçilen ±0.10 mm sınırını gösterir.',
+    `(a) Eğri, sınır genişledikçe gücün hızla arttığını göstermektedir; ±0.10 mm sınırında 15 katılımcı ${pct(G.tost15['0.1'])} güç sağlamaktadır. (b) p değeri ±${f3(E.min_M)} mm’de 0.05’in altına inmektedir. Bu değerin üzerindeki her sınırda, dolayısıyla seçilen ±0.10 mm sınırında da iki yöntem eşdeğerdir. Sonuç, sınır seçimine duyarlı değildir.`),
+  H2('6.2. Uyum ve eşdeğerlik sonuçları'),
   CAP('**Tablo 4.** Primescan ile Füzyon model arasındaki uyum ve eşdeğerlik analizi'),
   table(['Analiz', 'Sonuç', 'Yorum'], [
     ['Ortalama fark (Primescan − Füzyon)', `${f3(U.ort)} mm (SS ${f3(U.ss)})`, 'Sistematik fark yok'],
@@ -182,7 +191,8 @@ C.push(
     ['ICC(A,1) (%95 GA)', `${f2(U.icc)} (${f2(U.icc_alt)} – ${f2(U.icc_ust)})`, 'İyi düzeyde uyum (küçük örneklem nedeniyle GA geniş)'],
     ['Spearman korelasyonu', `ρ = ${f2(U.spearman)}; p ${pf(U.spearman_p)}`, 'Güçlü pozitif ilişki'],
     ['Eşdeğerlik testi (TOST), ±0.10 mm', `%90 GA: ${f3(U.ci90[0])} ile ${f3(U.ci90[1])}; p ${pf(U.tost['0.1'])}`, '**Eşdeğer**'],
-    ['Eşdeğerlik testi (TOST), ±0.05 mm', `p = ${f3(U.tost['0.05'])}`, 'Daha sıkı sınırda da eşdeğer'],
+    ['Eşdeğerlik testi (TOST), ±0.05 mm', `p = ${f3(U.tost['0.05'])}`, 'Daha dar sınırda da eşdeğer'],
+    ['Eşdeğerliğin gösterilebildiği en küçük sınır', `±${f3(E.min_M)} mm`, 'Ortalama fark %90 güvenle 43 µm’yi aşmıyor'],
   ], [34, 36, 30]),
   NOTE('ICC yorumu: < 0.50 zayıf, 0.50–0.75 orta, 0.75–0.90 iyi, > 0.90 mükemmel (Koo ve Li, 2016). TOST’ta farkın %90 GA’sı eşdeğerlik sınırları içinde kalıyorsa iki yöntem eşdeğer kabul edilir.'),
   ...figure('s08_sacilim.png', 3.9, 'Primescan ve Füzyon sapmalarının katılımcı bazında ilişkisi. Kesikli çizgi iki yöntemin tam olarak aynı sonucu verdiği durumu gösterir.',
@@ -190,7 +200,7 @@ C.push(
   ...figure('s09_bland_altman.png', 5.6, 'Bland–Altman grafiği: Primescan ve Füzyon model. Yeşil bant ±0.10 mm eşdeğerlik sınırını gösterir.',
     `Ortalama fark sıfıra çok yakındır (${f3(U.ort)} mm) ve farklar ölçüm büyüklüğüyle değişmemektedir. Bireysel farkların büyük bölümü ±0.10 mm bandı içindedir; uyum sınırları ±0.17 mm civarındadır.`),
   ...figure('s10_tost.png', 5.6, 'Eşdeğerlik testi: ortalama farkın %90 güven aralığı ve eşdeğerlik sınırları.',
-    `Ortalama farkın %90 güven aralığı (${f3(U.ci90[0])} ile ${f3(U.ci90[1])} mm) ±0.10 mm sınırlarının ve hatta ±0.05 mm sınırlarının tamamen içindedir. **Füzyon model ile Primescan istatistiksel olarak eşdeğer doğruluğa sahiptir.**`),
+    `Ortalama farkın %90 güven aralığı (${f3(U.ci90[0])} ile ${f3(U.ci90[1])} mm) seçilen ±0.10 mm sınırının ve daha dar ±0.05 mm sınırının tamamen içindedir. **Füzyon model ile Primescan istatistiksel olarak eşdeğer doğruluğa sahiptir.**`),
 
   // 7
   H1('7. Örneklem Büyüklüğü ve Güç Analizi'),
@@ -212,6 +222,7 @@ C.push(
     ['Üç yöntemin genel karşılaştırması (Friedman)', 'Bootstrap simülasyonu (gözlenen veri)', '≈ %100'],
     ['KIBT – Primescan; KIBT – Füzyon', 'Eşleştirilmiş test, α′ = 0.0167', '≈ %100'],
     ['Primescan – Füzyon eşdeğerliği (±0.10 mm)', 'TOST, Monte Carlo simülasyonu', pct(G.tost15['0.1'])],
+    ['%80 güçle gösterilebilen en dar eşdeğerlik sınırı', 'TOST, Monte Carlo simülasyonu', `±${f3(E.M80)} mm`],
   ], [40, 42, 18]),
   ...figure('s12_guc_posthoc.png', 6.2, '(a) Gözlenen verilerle Friedman testinin katılımcı sayısına göre gücü. (b) Primescan – Füzyon eşdeğerlik testinin gücü.',
     `(a) Gözlenen etki o kadar büyüktür ki Friedman testi 4 katılımcı ile bile %80 gücü aşmaktadır (n = 3’te ${pct(fs3)}). (b) ±0.10 mm sınırında eşdeğerliği %80 güçle göstermek için yaklaşık 9 katılımcı yeterlidir; 15 katılımcıda güç ${pct(G.tost15['0.1'])}’dir. Tüm analizler için **15 katılımcı yeterli istatistiksel gücü sağlamaktadır.**`),
@@ -220,9 +231,9 @@ C.push(
   H1('8. Sonuç'),
   NL(`Üç yöntemin doğruluğu arasında istatistiksel olarak anlamlı ve büyük bir fark vardır (Friedman χ²(2) = ${f2(FR.chi2)}; p < 0.001; W = ${f3(FR.W)}).`, 'n1'),
   NL(`Tek başına KIBT’den elde edilen sanal modeller, referansa göre en yüksek sapmayı (≈ 2.07 mm) göstermiştir ve ağız içi tarama ile füzyon modellere göre yaklaşık 1.7 mm daha az doğrudur (p < 0.001).`, 'n1'),
-  NL('Füzyon model ile ağız içi tarama (Primescan) arasında anlamlı fark yoktur ve iki yöntem ±0.10 mm sınırında eşdeğerdir. Füzyon işlemi, ağız içi taramanın yüzey doğruluğunu korumaktadır.', 'n1'),
+  NL('Füzyon model ile ağız içi tarama (Primescan) arasında anlamlı fark yoktur ve iki yöntem ±0.10 mm sınırında eşdeğerdir (eşdeğerlik ±0.043 mm’ye kadar desteklenmektedir). Füzyon işlemi, ağız içi taramanın yüzey doğruluğunu korumaktadır.', 'n1'),
   NL('Tasarıma uygun a priori hesaplama ve gözlenen verilerle yapılan güç analizleri, 15 katılımcının çalışmanın tüm temel soruları için yeterli olduğunu göstermektedir.', 'n1'),
-  P('**Sınırlılıklar:** KIBT ölçümlerinde iki katılımcının (K8, K14) değerleri grubun geri kalanından düşüktür; bu değerler sonuçları değiştirmemektedir. Eşdeğerlik sınırı (±0.10 mm), tezin yöntem bölümünde literatüre dayalı klinik gerekçesiyle birlikte belirtilmelidir.'),
+  P('**Sınırlılıklar:** KIBT ölçümlerinde iki katılımcının (K8, K14) değerleri grubun geri kalanından düşüktür; bu değerler sonuçları değiştirmemektedir. Eşdeğerlik sınırı harici bir klinik eşiğe değil, çalışmanın kendi güç analizine dayanmaktadır ve analiz aşamasında belirlenmiştir; bu nedenle ±0.10 mm’nin klinik önemi tezin tartışma bölümünde ayrıca yorumlanmalıdır. Bununla birlikte sonuç, ±0.043 mm’nin üzerindeki her sınırda geçerlidir.'),
 
   // 9
   new Paragraph({ children: [new PageBreak()] }),
@@ -230,9 +241,9 @@ C.push(
   H2('9.1. Gereç ve Yöntem – Örneklem büyüklüğü'),
   P('Örneklem büyüklüğü, aynı katılımcılardan elde edilen bağımlı ölçümlerin karşılaştırılmasına uygun olarak G*Power 3.1 (Heinrich Heine Üniversitesi, Düsseldorf, Almanya) programında eşleştirilmiş örneklem testi esas alınarak hesaplanmıştır. Literatüre dayalı etki büyüklüğü 1.2, anlamlılık düzeyi üç ikili karşılaştırma için Bonferroni düzeltmesiyle 0.0167 (iki yönlü) ve güç 0.80 alındığında gerekli örneklem büyüklüğü 11 olarak bulunmuştur. Parametrik olmayan testlerin göreli etkinliği (0.864) dikkate alınarak bu sayı 12’ye, olası veri kayıpları için %20 ek pay ile 15 katılımcıya yükseltilmiştir.'),
   H2('9.2. Gereç ve Yöntem – İstatistiksel analiz'),
-  P('Verilerin normal dağılıma uygunluğu Shapiro–Wilk testi ile değerlendirilmiştir. Verilerin bir kısmı normal dağılım göstermediğinden, üç yöntemin karşılaştırılmasında Friedman testi kullanılmış ve etki büyüklüğü Kendall’s W ile hesaplanmıştır. İkili karşılaştırmalar Wilcoxon işaretli sıralar testi ile yapılmış ve Bonferroni düzeltmesi uygulanmıştır. Primescan ve füzyon modeller arasındaki uyum Bland–Altman analizi ve sınıf içi korelasyon katsayısı [ICC(A,1)] ile; iki yöntemin eşdeğerliği ise ±0.10 mm eşdeğerlik sınırı ile iki tek yönlü test (TOST) yöntemiyle değerlendirilmiştir. İstatistiksel anlamlılık düzeyi p < 0.05 olarak kabul edilmiştir.'),
+  P('Verilerin normal dağılıma uygunluğu Shapiro–Wilk testi ile değerlendirilmiştir. Verilerin bir kısmı normal dağılım göstermediğinden, üç yöntemin karşılaştırılmasında Friedman testi kullanılmış ve etki büyüklüğü Kendall’s W ile hesaplanmıştır. İkili karşılaştırmalar Wilcoxon işaretli sıralar testi ile yapılmış ve Bonferroni düzeltmesi uygulanmıştır. Primescan ve füzyon modeller arasındaki uyum Bland–Altman analizi ve sınıf içi korelasyon katsayısı [ICC(A,1)] ile; iki yöntemin eşdeğerliği ise iki tek yönlü test (TOST) yöntemiyle değerlendirilmiştir. Primescan ve füzyon modellerin benzerliğini değerlendirmek amacıyla analiz aşamasında eklenen eşdeğerlik testinde sınır, çalışmanın kendi örneklem büyüklüğü ve gözlenen fark değişkenliği esas alınarak belirlenmiştir: 15 katılımcı ile %80’in üzerinde güç sağlayan sınırlar arasından ±0.10 mm (güç %98.7) seçilmiştir. Ayrıca eşdeğerliğin gösterilebildiği en küçük sınır, ortalama farkın %90 güven aralığından hesaplanmıştır. İstatistiksel anlamlılık düzeyi p < 0.05 olarak kabul edilmiştir.'),
   H2('9.3. Bulgular'),
-  P(`KIBT – referans tarama, Primescan – referans tarama ve füzyon model – referans veri karşılaştırmalarında ortalama sapma değerleri sırasıyla ${f3(K.ort)} ± ${f3(K.ss)} mm, ${f3(PS.ort)} ± ${f3(PS.ss)} mm ve ${f3(FU.ort)} ± ${f3(FU.ss)} mm olarak bulunmuştur (Tablo 1). Üç yöntem arasında istatistiksel olarak anlamlı fark saptanmıştır (Friedman χ²(2) = ${f2(FR.chi2)}; p < 0.001; Kendall’s W = ${f3(FR.W)}). Bonferroni düzeltmeli ikili karşılaştırmalarda KIBT modellerinin sapması hem Primescan (ortalama fark ${f3(KP.ort)} mm; p < 0.001; r = ${f2(KP.r)}) hem de füzyon modellere (ortalama fark ${f3(KF.ort)} mm; p < 0.001; r = ${f2(KF.r)}) göre anlamlı olarak yüksek bulunmuştur. Primescan ile füzyon modeller arasında anlamlı fark saptanmamıştır (ortalama fark ${f3(PF.ort)} mm; %95 GA ${f3(PF.alt)} ile ${f3(PF.ust)} mm; p = ${f3(PF.p_bonf)}). Farkın %90 güven aralığı (${f3(U.ci90[0])} ile ${f3(U.ci90[1])} mm) ±0.10 mm eşdeğerlik sınırları içinde kaldığından iki yöntem eşdeğer bulunmuştur (TOST p < 0.001). Bland–Altman analizinde ortalama fark ${f3(U.ort)} mm, %95 uyum sınırları ${f3(U.loa[0])} ile ${f3(U.loa[1])} mm; iki yöntem arasındaki uyum iyi düzeyde bulunmuştur [ICC(A,1) = ${f2(U.icc)}; %95 GA ${f2(U.icc_alt)} – ${f2(U.icc_ust)}].`),
+  P(`KIBT – referans tarama, Primescan – referans tarama ve füzyon model – referans veri karşılaştırmalarında ortalama sapma değerleri sırasıyla ${f3(K.ort)} ± ${f3(K.ss)} mm, ${f3(PS.ort)} ± ${f3(PS.ss)} mm ve ${f3(FU.ort)} ± ${f3(FU.ss)} mm olarak bulunmuştur (Tablo 1). Üç yöntem arasında istatistiksel olarak anlamlı fark saptanmıştır (Friedman χ²(2) = ${f2(FR.chi2)}; p < 0.001; Kendall’s W = ${f3(FR.W)}). Bonferroni düzeltmeli ikili karşılaştırmalarda KIBT modellerinin sapması hem Primescan (ortalama fark ${f3(KP.ort)} mm; p < 0.001; r = ${f2(KP.r)}) hem de füzyon modellere (ortalama fark ${f3(KF.ort)} mm; p < 0.001; r = ${f2(KF.r)}) göre anlamlı olarak yüksek bulunmuştur. Primescan ile füzyon modeller arasında anlamlı fark saptanmamıştır (ortalama fark ${f3(PF.ort)} mm; %95 GA ${f3(PF.alt)} ile ${f3(PF.ust)} mm; p = ${f3(PF.p_bonf)}). Farkın %90 güven aralığı (${f3(U.ci90[0])} ile ${f3(U.ci90[1])} mm) ±0.10 mm eşdeğerlik sınırları içinde kaldığından iki yöntem eşdeğer bulunmuştur (TOST p < 0.001); eşdeğerliğin gösterilebildiği en küçük sınır ±0.043 mm’dir. Bland–Altman analizinde ortalama fark ${f3(U.ort)} mm, %95 uyum sınırları ${f3(U.loa[0])} ile ${f3(U.loa[1])} mm; iki yöntem arasındaki uyum iyi düzeyde bulunmuştur [ICC(A,1) = ${f2(U.icc)}; %95 GA ${f2(U.icc_alt)} – ${f2(U.icc_ust)}].`),
 
   H1('Kaynaklar'),
   ...[
